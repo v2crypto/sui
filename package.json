@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@curvefi/api": "^1.25.2",
+    "binance-api-node": "^0.11.40",
+    "dotenv": "^16.0.1",
+    "ethers": "^5.6.8",
+    "tracer": "^1.1.5",
+    "web3": "^1.7.3"
+  },
+  "devDependencies": {
+    "jest": "^28.1.1"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  }
+}
