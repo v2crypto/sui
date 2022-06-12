@@ -23,7 +23,7 @@ it('[dex] get decimals', async function (){
   expect(e - s).toBeLessThan(10)
 })
 
-it('get balance', async function () {
+it('[dex] get balance', async function () {
   let b
   b = await dex.balanceOf(USDC)
   expect(b).toBeGreaterThan(0)
@@ -33,18 +33,35 @@ it('get balance', async function () {
 })
 
 describe('[dex] get price', function () {
-  const cex = new CEX({
-    apiKey: process.env['ApiKey'],
-    apiSecret: process.env['ApiSecret']
-  })
   const symbol = 'GLMRUSDT'
+  let price
+
+  beforeAll(async () => {
+    const cex = new CEX({
+      apiKey: process.env['ApiKey'],
+      apiSecret: process.env['ApiSecret']
+    })
+    const result = await cex.client.prices({symbol})
+    price = Number(result[symbol])
+  })
+
   it('sell GLMR price in beam', async function () {
-    const price = await cex.client.prices(symbol)
-    console.log(price)
-    const dexPrice = await dex.getBeamSellAmounts(10)
-    expect(dexPrice).toBeCloseTo(price[symbol])
+    const dexPrice = await dex.getBeamSellAmounts(1)
+    expect(dexPrice).toBeCloseTo(price)
   })
 
   it('buy GLMR price in beam', async function () {
+    const dexPrice = await dex.getBeamBuyAmounts(1)
+    expect(dexPrice).toBeCloseTo(price)
+  })
+
+  it('sell GLMR price in stella', async function () {
+    const dexPrice = await dex.getStellaSellAmounts(1)
+    expect(dexPrice).toBeCloseTo(price)
+  })
+
+  it('buy GLMR price in stella', async function () {
+    const dexPrice = await dex.getStellaBuyAmounts(1)
+    expect(dexPrice).toBeCloseTo(price)
   })
 })

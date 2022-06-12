@@ -6,7 +6,9 @@ export class CEX {
   constructor(options={}) {
     this.client = Binance.default({
       apiKey: options.apiKey,
-      apiSecret: options.apiSecret
+      apiSecret: options.apiSecret,
+      httpBase: options.httpBase | 'https://api.binance.com',
+      httpFutures: options.httpFutures | 'https://fapi.binance.com',
     })
   }
 
@@ -24,7 +26,7 @@ export class CEX {
     const result = await this.client.book({ symbol, limit: depth})
     let orderBook, total=0, left=amount
     if (side === SIDE.BUY) { // asks
-      orderBook = result['asks']
+      orderBook = result['asks'].reverse()
     } else { // bids
       orderBook = result['bids']
     }
@@ -37,14 +39,12 @@ export class CEX {
         total += price * left
       }
       left = left - quantity
+      if (left <= 0){
+        return total
+      }
     }
-
     // return 0 if not enough depth
-    if (left > 0) {
-      return 0
-    } else {
-      return total
-    }
+    return 0
   }
 
   async order (symbol, side, type, quantity, price=null) {

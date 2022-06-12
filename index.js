@@ -83,7 +83,7 @@ class CDArbitrage {
         this.cex.getAverage(symbol, SIDE.SELL, this.orderAmount)
       ])
       const dexCost = beamCost >= stellaCost ? stellaCost : beamCost
-      best = beamCost >= stellaCost ? this.dex.buyOnStella : this.dex.buyOnStella
+      best = beamCost >= stellaCost ? this.dex.buyOnStella : this.dex.buyOnBeam
       if (cexGot === 0) {
         return [false, null]
       }
