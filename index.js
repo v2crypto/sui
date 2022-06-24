@@ -63,7 +63,7 @@ class CDArbitrage {
           continue
         }
 
-        // todo 记录订单到数据库，方便 bug 追踪和程序优化
+        // todo 记录订单到数据库，方便 bug 追踪和程序优化, 可以设置 ClientOrderId, traceTx 同时 计算该笔套利的全部获利信息
 
         logger.info('no spread exits, continue...')
         await sleep(0.2 * 1000)
