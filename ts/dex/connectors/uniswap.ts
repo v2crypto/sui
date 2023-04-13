@@ -1,4 +1,4 @@
-import { AbiCoder, Provider, Wallet, ethers } from "ethers";
+import { BigNumber, Wallet, ethers } from "ethers";
 import { DexConnector } from "../dex";
 import { POOL_FACTORY_CONTRACT_ADDRESS, QUOTER_CONTRACT_ADDRESS, SIDE, SWAP_ROUTER_ADDRESS } from "../../const";
 import { FeeAmount, Pool, Route, SwapOptions, SwapQuoter, SwapRouter, Trade, computePoolAddress } from "@uniswap/v3-sdk";
@@ -8,7 +8,8 @@ import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/I
 import { ERC20Token } from "../../token/erc20";
 import { fromReadableAmount, toUniswapToken } from "../../utils";
 import JSBI from 'jsbi'
-import { SWAP_ROUTER_02_ADDRESSES } from "@uniswap/smart-order-router";
+import { sendTransactionViaWallet } from "./uniswap-provider";
+import { ARB1_ARB_USDT_MAX_FEE_PER_GAS, ARB1_ARB_USDT_MAX_PRIORITY_FEE_PER_GAS } from "../../arbitrage/strategy/arb-usdt";
 
 export type TokenTrade = Trade<Token, Token, TradeType>
 
@@ -23,12 +24,12 @@ export enum TransactionState {
 
 
 export class UniswapConnector implements DexConnector {
-    constructor(public wallet: Wallet, public provider: Provider) {}
+    constructor(public wallet: Wallet, public provider: BaseProvider) {}
 
     async isTransactionSynced() {
         const [latest, pending] = await Promise.all([
-          this.wallet.getNonce('latest'),
-          this.wallet.getNonce('pending')
+          this.wallet.getTransactionCount('latest'),
+          this.wallet.getTransactionCount('pending')
         ])
         return latest === pending
       }
@@ -63,7 +64,7 @@ export class UniswapConnector implements DexConnector {
       })
       
       // use v6 abi coder to decode the return data
-      return AbiCoder.defaultAbiCoder().decode(['uint256'], quoteCallReturnData)
+      return ethers.utils.defaultAbiCoder.decode(['uint256'], quoteCallReturnData)
       
     }
 
@@ -147,19 +148,25 @@ export class UniswapConnector implements DexConnector {
     
       const methodParameters = SwapRouter.swapCallParameters([trade], options)
     
-      const tx = {
+      const tx: ethers.providers.TransactionRequest = {
         data: methodParameters.calldata,
         to: SWAP_ROUTER_ADDRESS,
         value: methodParameters.value,
         from: this.wallet.address,
-        // maxFeePerGas: MAX_FEE_PER_GAS,
-        // maxPriorityFeePerGas: MAX_PRIORITY_FEE_PER_GAS,
+        maxFeePerGas: ARB1_ARB_USDT_MAX_FEE_PER_GAS,
+        maxPriorityFeePerGas: ARB1_ARB_USDT_MAX_PRIORITY_FEE_PER_GAS,
       }
     
-      //const res = await sendTransaction(tx)
-    
-      // return res
+      if (tx.value) {
+        tx.value = BigNumber.from(tx.value)
+      }
+      const res = sendTransactionViaWallet(tx, this.provider, this.wallet)
+      return res
     }
     
+    async marketOrder(tokenIn: ERC20Token, tokenOut: ERC20Token, amountIn: number) {
+      const tx = await this.createTrade(tokenIn, tokenOut, amountIn)
+      return this.executeTrade(tx)
+    }
 
 }

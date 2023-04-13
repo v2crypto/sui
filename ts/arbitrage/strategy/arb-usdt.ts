@@ -8,11 +8,13 @@ import { chainSettings } from "../../settings";
 import { Arb1UsdtToken } from "../../token/arb1-usdt";
 import { Arb1ArbToken } from "../../token/arb1-arb";
 import { sleep } from "../../utils";
-import { BaseProvider } from "@ethersproject/providers";
+
+export const ARB1_ARB_USDT_MAX_FEE_PER_GAS = 100000000000
+export const ARB1_ARB_USDT_MAX_PRIORITY_FEE_PER_GAS = 100000000000
 
 // provider
 const NETWORK_URL = chainSettings.chains.arb1.networkUrl
-const provider = new ethers.JsonRpcProvider(NETWORK_URL)
+const provider = new ethers.providers.JsonRpcProvider(NETWORK_URL)
 
 // wallet
 const WALLET_PRIVATE_KEY = chainSettings.walletPrivateKey!
@@ -53,14 +55,14 @@ const run = async () => {
     const symbol = arb1ArbToken.symbol + arb1UsdtToken.symbol
     const [c2dSpread, c2dAmount] = await cdArbitrage.getC2DSpreadAndAmount(symbol, 0.0001);
     if (c2dSpread > expectedSpread) {
-        await dexClient.createTrade(arb1UsdtToken, arb1ArbToken, c2dAmount);
+        await dexClient.marketOrder(arb1UsdtToken, arb1ArbToken, c2dAmount);
         await cexClient.marketOrder(symbol, "SELL", c2dAmount);
         return;
     }
 
     const [d2cSpread, d2cAmount] = await cdArbitrage.getD2CSpreadAndAmount(symbol, 0.0001);
     if (d2cSpread > expectedSpread) {
-        await dexClient.createTrade(arb1ArbToken, arb1UsdtToken, d2cAmount);
+        await dexClient.marketOrder(arb1ArbToken, arb1UsdtToken, d2cAmount);
         await cexClient.marketOrder(symbol, "BUY", d2cAmount);
     }
 }
