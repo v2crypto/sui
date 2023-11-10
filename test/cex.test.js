@@ -26,7 +26,7 @@ it('[cex] get balance', async function (){
 })
 
 it('[cex] place order', async function (){
-  const o = await cex.order('BTCUSDT', 'BUY', 'MARKET',0.00005)
+  const o = await cex.order('BTCUSDT', 'BUY', 'MARKET', 0.00005)
   expect(o).toMatchObject({
     symbol: 'BTCUSDT',
     orderId: expect.any(Number),

@@ -1,4 +1,4 @@
-import { BigNumber, Wallet, ethers } from "ethers";
+import { BigNumber, Wallet, ethers, logger } from "ethers";
 import { DexConnector } from "../dex";
 import { POOL_FACTORY_CONTRACT_ADDRESS, QUOTER_CONTRACT_ADDRESS, SIDE, SWAP_ROUTER_ADDRESS } from "../../const";
 import { FeeAmount, Pool, Route, SwapOptions, SwapQuoter, SwapRouter, Trade, computePoolAddress } from "@uniswap/v3-sdk";
@@ -6,10 +6,10 @@ import { Currency, CurrencyAmount, Percent, Token, TradeType } from "@uniswap/sd
 import { BaseProvider } from "@ethersproject/providers";
 import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json'
 import { ERC20Token } from "../../token/erc20";
-import { fromReadableAmount, toUniswapToken } from "../../utils";
 import JSBI from 'jsbi'
 import { sendTransactionViaWallet } from "./uniswap-provider";
-import { ARB1_ARB_USDT_MAX_FEE_PER_GAS, ARB1_ARB_USDT_MAX_PRIORITY_FEE_PER_GAS } from "../../arbitrage/strategy/arb-usdt";
+import { settings } from "../../settings";
+import { fromReadableAmount } from "../../utils";
 
 export type TokenTrade = Trade<Token, Token, TradeType>
 
@@ -21,9 +21,8 @@ export enum TransactionState {
   Sent = 'Sent',
 }
 
-
-
 export class UniswapConnector implements DexConnector {
+
     constructor(public wallet: Wallet, public provider: BaseProvider) {}
 
     async isTransactionSynced() {
@@ -34,25 +33,42 @@ export class UniswapConnector implements DexConnector {
         return latest === pending
       }
 
-    async getTradeAmount(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number) {
+    async getTradeAmount(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number) {
+      const tokenIn = side === "BUY" ? tokenB : tokenA
+      const tokenOut = side === "BUY" ? tokenA : tokenB
       const poolAddress = await this.getPoolAddress(tokenIn, tokenOut)
       const swapRoute = await this.getSwapRoute(poolAddress, tokenIn, tokenOut)
-      const amountOut = await this.getOutputQuote(swapRoute, tokenIn, tokenOut, amount)
-      return Number(JSBI.BigInt(amountOut))
+      const tradeAmount = await this.getQuote(swapRoute, tokenIn, tokenOut, side , amount)
+      return Number(ethers.utils.formatUnits(tradeAmount[0],tokenB.decimals))
     }
 
-    async  getOutputQuote(route: Route<Currency, Currency>, tokenIn: ERC20Token, tokenOut: ERC20Token, amountIn: number) {
+    async marketOrder(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number) {
+      const tokenIn = side === "BUY" ? tokenB : tokenA
+      const tokenOut = side === "BUY" ? tokenA : tokenB
+      if (settings.level === 'debug') {
+        logger.info(`UniswapConnector.marketOrder: tokenIn: ${tokenIn.symbol}, tokenOut: ${tokenOut.symbol}, amount: ${amount}, 方向为：` + side === "BUY" ? "BUY" : "SELL")
+        return
+      }
+      const tx = await this.createTrade(tokenIn, tokenOut, side, amount)
+      const tradeStatus = await this.executeTrade(tx)
+      return tradeStatus
+    }
 
+    private async getQuote(route: Route<Currency, Currency>, tokenIn: ERC20Token, tokenOut: ERC20Token, side: SIDE, amount: number) {
+
+      const tradeType = side === "BUY" ? TradeType.EXACT_OUTPUT : TradeType.EXACT_INPUT
+      const token = side === "BUY" ? tokenOut : tokenIn
+      
       const { calldata } = await SwapQuoter.quoteCallParameters(
         route,
         CurrencyAmount.fromRawAmount(
-          await toUniswapToken(tokenIn),
+          token,
           fromReadableAmount(
-            amountIn,
-            tokenIn.decimals
+            amount,
+            token.decimals
           )
         ),
-        TradeType.EXACT_INPUT,
+        tradeType,
         {
           useQuoterV2: true,
         }
@@ -71,21 +87,21 @@ export class UniswapConnector implements DexConnector {
     private async getPoolAddress(tokenIn: ERC20Token, tokenOut: ERC20Token) {
       const currentPoolAddress = computePoolAddress({
         factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS,
-        tokenA: await toUniswapToken(tokenIn),
-        tokenB: await toUniswapToken(tokenOut),
-        fee: FeeAmount.MEDIUM,
+        tokenA: tokenIn,
+        tokenB: tokenOut,
+        fee: FeeAmount.LOW,
       })
       return currentPoolAddress
     }
 
-    async getSwapRoute(poolAddress: string, tokenIn: ERC20Token, tokenOut: ERC20Token) {
+    private async getSwapRoute(poolAddress: string, tokenIn: ERC20Token, tokenOut: ERC20Token) {
       const poolContract = new ethers.Contract(
         poolAddress,
         IUniswapV3PoolABI.abi,
         this.provider
       )
-      const token0 = await toUniswapToken(tokenIn)
-      const token1 = await toUniswapToken(tokenOut)
+      const token0 = tokenIn
+      const token1 = tokenOut
       const [liquidity, slot0] =
       await Promise.all([
         poolContract.liquidity(),
@@ -95,7 +111,7 @@ export class UniswapConnector implements DexConnector {
       const pool = new Pool(
         token0,
         token1,
-        FeeAmount.MEDIUM,
+        FeeAmount.LOW,
         sqrtPriceX96.toString(),
         liquidity.toString(),
         // 此处必须转为number，否则会报错
@@ -103,36 +119,37 @@ export class UniswapConnector implements DexConnector {
       )
       const swapRoute = new Route(
         [pool],
-        await toUniswapToken(tokenIn),
-        await toUniswapToken(tokenOut),
+        tokenIn,
+        tokenOut,
       )
       return swapRoute
     }
 
-    async createTrade(tokenIn: ERC20Token, tokenOut: ERC20Token, amountIn: number): Promise<TokenTrade> {
+    private async createTrade(tokenIn: ERC20Token, tokenOut: ERC20Token, side: SIDE ,amountIn: number): Promise<TokenTrade> {
+      const tradeType = side === "BUY" ? TradeType.EXACT_OUTPUT : TradeType.EXACT_INPUT
       const poolAddress = await this.getPoolAddress(tokenIn, tokenOut)
       const swapRoute = await this.getSwapRoute(poolAddress, tokenIn, tokenOut)
-      const amountOut = await this.getOutputQuote(swapRoute, tokenIn, tokenOut, amountIn)
+      const amountOut = await this.getQuote(swapRoute, tokenIn, tokenOut, side, amountIn)
 
       const uncheckedTrade = Trade.createUncheckedTrade({
         route: swapRoute,
         inputAmount: CurrencyAmount.fromRawAmount(
-          await toUniswapToken(tokenIn),
+          tokenIn,
           fromReadableAmount(
             amountIn,
             tokenIn.decimals
           ).toString()
         ),
         outputAmount: CurrencyAmount.fromRawAmount(
-          await toUniswapToken(tokenOut),
+          tokenOut,
           JSBI.BigInt(amountOut)
         ),
-        tradeType: TradeType.EXACT_INPUT,
+        tradeType,
       })
       return uncheckedTrade
     }
 
-    async executeTrade(
+    private async executeTrade(
       trade: TokenTrade
     ): Promise<TransactionState> {
     
@@ -153,8 +170,8 @@ export class UniswapConnector implements DexConnector {
         to: SWAP_ROUTER_ADDRESS,
         value: methodParameters.value,
         from: this.wallet.address,
-        maxFeePerGas: ARB1_ARB_USDT_MAX_FEE_PER_GAS,
-        maxPriorityFeePerGas: ARB1_ARB_USDT_MAX_PRIORITY_FEE_PER_GAS,
+        maxFeePerGas: 100000000000,
+        maxPriorityFeePerGas: 100000000000,
       }
     
       if (tx.value) {
@@ -164,9 +181,6 @@ export class UniswapConnector implements DexConnector {
       return res
     }
     
-    async marketOrder(tokenIn: ERC20Token, tokenOut: ERC20Token, amountIn: number) {
-      const tx = await this.createTrade(tokenIn, tokenOut, amountIn)
-      return this.executeTrade(tx)
-    }
+
 
 }

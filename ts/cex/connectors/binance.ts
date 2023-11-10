@@ -3,6 +3,7 @@ import BinanceClient, { Bid, Binance, OrderSide, OrderType } from "binance-api-n
 import { CexConnector } from "../cex";
 import { cexSettings } from "../../settings";
 import { SIDE } from "../../const";
+import logger from "../../log";
 
 export class BinanceConnector implements CexConnector {
     private client: Binance;
@@ -24,7 +25,6 @@ export class BinanceConnector implements CexConnector {
         const balance = balances.balances.find((b) => b.asset === coin);
         if (!balance) {
             return 0
-            // throw new Error(`No balance of ${coin}`);
         }
         return parseFloat(balance.free);
     }
@@ -40,7 +40,6 @@ export class BinanceConnector implements CexConnector {
 
     public async getTradeAmount(symbol: string, side: SIDE, amount: number, depth=5) {
         // todo 通过 ws 维护本地的 order book
-        symbol = "BTCUSDT"
         const orderBook = await this.client.book({ symbol, limit: depth})
         // todo 通过 ws 维护本地的 order book
         let bids: Bid[] =[], total=0, left=amount
@@ -67,12 +66,22 @@ export class BinanceConnector implements CexConnector {
       }
 
     public async marketOrder(symbol: string, side: SIDE, amount: number) {
-        const order = await this.client.order({
+        const exchangeInfo = await this.client.exchangeInfo({ symbol })
+        const filters = exchangeInfo.symbols[0].filters
+        const lotSizeFilter: any = filters.find(f => f.filterType === 'LOT_SIZE')
+        const stepSize = Number(lotSizeFilter.stepSize)
+        let decimalCount = Math.abs(Math.log10(stepSize));
+
+        const order = await this.client.orderTest({
             symbol,
-            side: side as OrderSide.BUY,
-            quantity: amount.toString(),
+            side: side as OrderSide,
+            quantity: amount.toFixed(decimalCount),
             type: OrderType.MARKET,
+            // recvWindow: 1000,
         });
+        logger.info(`币安 market order ${side} ${amount} ${symbol} success`);
+        logger.debug("币安下单详情", order)
+
         return order.orderId;
     }
 }

@@ -4,9 +4,8 @@ import { TokenTrade, TransactionState } from "./connectors/uniswap";
 
 export interface DexConnector {
     isTransactionSynced(): Promise<boolean>;
-    getTradeAmount(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number): Promise<number>;
-    createTrade(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number): Promise<TokenTrade>;
-    marketOrder(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number): Promise<TransactionState>;
+    getTradeAmount(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number): Promise<number>;
+    marketOrder(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number): Promise<TransactionState>;
 }
 
 export class DexClient {
@@ -19,16 +18,12 @@ export class DexClient {
         return this.strategy.isTransactionSynced();
     }
 
-    async getTraveAmount(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number) {
-        return this.strategy.getTradeAmount(tokenIn, tokenOut, amount);
+    async getTraveAmount(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number) {
+        return this.strategy.getTradeAmount(tokenA, tokenB, side, amount);
     }
 
-    async createTrade(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number) {
-        return this.strategy.createTrade(tokenIn, tokenOut, amount);
-    }
-
-    async marketOrder(tokenIn: ERC20Token, tokenOut: ERC20Token, amount: number) {
-        return this.strategy.marketOrder(tokenIn, tokenOut, amount);
+    async marketOrder(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number) {
+        return this.strategy.marketOrder(tokenA, tokenB, side, amount);
     }
     
 }

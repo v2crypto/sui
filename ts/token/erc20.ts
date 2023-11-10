@@ -1,34 +1,40 @@
 import { Contract, Wallet, ethers } from "ethers"
-import { chainSettings } from "../settings"
+import { Token } from '@uniswap/sdk-core';
 
-export class ERC20Token {
+export type TokenInfo = {
+    symbol: string
+    name: string
+    decimals: number
+    address: string
+    ABI: any
+    chainId: number
+    
+}
+
+export class ERC20Token extends Token{
     private constract: Contract
-    public decimals: number
-    public address: string
+    public ABI: any
 
     constructor(
         public wallet: Wallet,
-        public chain: string,
-        public symbol: string,
-        public name: string,
+        tokenInfo: TokenInfo
     ) {
-        const abi = chainSettings.chains[chain].tokens[symbol].ABI
-        this.address = chainSettings.chains[chain].tokens[symbol].address
-        this.constract = new ethers.Contract(this.address, abi, wallet)
+        super(tokenInfo.chainId, tokenInfo.address, tokenInfo.decimals, tokenInfo.symbol, tokenInfo.name)
+        this.ABI = tokenInfo.ABI
+        this.constract = new ethers.Contract(this.address, this.ABI, wallet)
     }
 
-    async decimalsOf() {
-        if (this.decimals) {
-            return this.decimals
-        }
-        const decimals = await this.constract.decimals()
-        this.decimals = Number(decimals)
-        return this.decimals
-    }
+    // async decimalsOf() {
+    //     if (this.decimals) {
+    //         return this.decimals
+    //     }
+    //     const decimals = await this.constract.decimals()
+    //     this.decimals = Number(decimals)
+    //     return this.decimals
+    // }
 
     async balanceOf(address: string) {
         const balance= await this.constract.balanceOf(address)
-        const decimals = await this.decimalsOf()
-        return Number(balance) / 10 ** decimals
+        return Number(balance) / 10 ** this.decimals
     }
 }

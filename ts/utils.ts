@@ -27,15 +27,3 @@ function countDecimals(x: number) {
   }
   return x.toString().split('.')[1].length || 0
 }
-
-export const toUniswapToken = async (token: ERC20Token) => {
-  const decimals = await token.decimalsOf()
-  // TODO: support other chains
-  return new Token(
-    ChainId.ARBITRUM_ONE,
-    token.address,
-    decimals,
-    token.symbol,
-    token.name
-  )
-}
