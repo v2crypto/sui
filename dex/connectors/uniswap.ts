@@ -62,7 +62,7 @@ export class UniswapConnector implements DexConnector {
       const { calldata } = await SwapQuoter.quoteCallParameters(
         route,
         CurrencyAmount.fromRawAmount(
-          token,
+          token.token,
           fromReadableAmount(
             amount,
             token.decimals
@@ -87,8 +87,8 @@ export class UniswapConnector implements DexConnector {
     private async getPoolAddress(tokenIn: ERC20Token, tokenOut: ERC20Token) {
       const currentPoolAddress = computePoolAddress({
         factoryAddress: POOL_FACTORY_CONTRACT_ADDRESS,
-        tokenA: tokenIn,
-        tokenB: tokenOut,
+        tokenA: tokenIn.token,
+        tokenB: tokenOut.token,
         fee: FeeAmount.LOW,
       })
       return currentPoolAddress
@@ -109,8 +109,8 @@ export class UniswapConnector implements DexConnector {
       ])
       const [sqrtPriceX96, tick] = slot0
       const pool = new Pool(
-        token0,
-        token1,
+        token0.token,
+        token1.token,
         FeeAmount.LOW,
         sqrtPriceX96.toString(),
         liquidity.toString(),
@@ -119,8 +119,8 @@ export class UniswapConnector implements DexConnector {
       )
       const swapRoute = new Route(
         [pool],
-        tokenIn,
-        tokenOut,
+        tokenIn.token,
+        tokenOut.token,
       )
       return swapRoute
     }
@@ -134,14 +134,14 @@ export class UniswapConnector implements DexConnector {
       const uncheckedTrade = Trade.createUncheckedTrade({
         route: swapRoute,
         inputAmount: CurrencyAmount.fromRawAmount(
-          tokenIn,
+          tokenIn.token,
           fromReadableAmount(
             amountIn,
             tokenIn.decimals
           ).toString()
         ),
         outputAmount: CurrencyAmount.fromRawAmount(
-          tokenOut,
+          tokenOut.token,
           JSBI.BigInt(amountOut)
         ),
         tradeType,

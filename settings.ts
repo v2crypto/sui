@@ -1,7 +1,7 @@
-import * as dotenv from 'dotenv'
+
 import { erc20ABI } from './abi'
 
-dotenv.config()
+require("dotenv").config()
 
 export const settings = {
     logsPath: process.env.LOGS_PATH || "./logs",
@@ -14,9 +14,10 @@ export const cexSettings = {
     binance: {
         apiKey: process.env.BINANCE_API_KEY!,
         apiSecret: process.env.BINANCE_API_SECRET!,
-        // httpBase: "https://testnet.binance.vision",
+        //httpBase: "https://testnet.binance.vision",
         httpBase: "https://api.binance.com",
         wsBase: "wss://stream.binance.com:9443/ws",
+        proxy: process.env.PROXY
     },
 }
 

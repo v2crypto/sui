@@ -9,11 +9,13 @@ export class BinanceConnector implements CexConnector {
     private client: Binance;
 
     constructor() {
+        console.log(cexSettings.binance.proxy)
         this.client = BinanceClient({
             apiKey: cexSettings.binance.apiKey,
             apiSecret: cexSettings.binance.apiSecret,
             httpBase: cexSettings.binance.httpBase,
             wsBase: cexSettings.binance.wsBase,
+            proxy: cexSettings.binance.proxy,
         });
     }
 

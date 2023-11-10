@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    index: './arbitrage/strategy/arb-usdt.ts',
+    index: './arbitrage/strategy/cetus-bn-sui-usdt.ts',
   },
   module: {
     rules: [
@@ -23,7 +23,9 @@ module.exports = {
   externals: {
     bufferutil: "bufferutil",
     "utf-8-validate": "utf-8-validate",
+    'node-fetch': 'commonjs2 node-fetch',
   },
   target: 'node',
   mode: 'production',
+  // devtool: 'source-map'
 };
