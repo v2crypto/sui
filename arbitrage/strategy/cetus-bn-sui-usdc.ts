@@ -14,6 +14,7 @@ import { SuiSuiToken } from "../../token/sui-sui";
 import { SuiUsdtToken } from "../../token/sui-usdt";
 import axios from 'axios';
 import { SuiUsdcToken } from "../../token/sui-usdc";
+import Decimal from "decimal.js";
 
 // // provider
 // const NETWORK_URL = chainSettings.chains.arb1.networkUrl
@@ -67,7 +68,11 @@ const run = async () => {
     
     if (c2dSpread > expectedSpread) {
         logger.info("币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`币安价格高: ${c2dGot}; \ncetus价格低: ${c2dAmount}\n` +`Spread为:${c2dSpread * 100}%\n高于预期:${expectedSpread * 100}%`)
+        sendToFeishu(`买卖${expectedAmount}个${suiSuiToken.symbol}，
+        币安价格高: ${divide(c2dGot, expectedAmount)}\n
+        cetus价格低: ${divide(c2dAmount, expectedAmount)}\n
+        Spread为:${c2dSpread * 100}%\n
+        高于预期:${expectedSpread * 100}%`)
         // await cdArbitrage.C2DOrder(expectedAmount, c2dAmount, cPair, dPair, uPair)
         return
     }
@@ -76,11 +81,25 @@ const run = async () => {
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
     if (d2cSpread > expectedSpread) {
         logger.info("cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`cetus价格高: ${d2cGot}; \n币安价格低: ${d2cAmount}\n` +`Spread为:${d2cSpread * 100}%\n高于预期:${expectedSpread * 100}%`)
+        sendToFeishu(`买卖${expectedAmount}个${suiSuiToken.symbol}，
+        cetus价格高: ${divide(d2cGot, expectedAmount)}\n
+        币安价格低: ${divide(d2cAmount, expectedAmount)}\n
+        Spread为:${d2cSpread * 100}%\n
+        高于预期:${expectedSpread * 100}%`)
+        
         return
         // await cdArbitrage.D2COrder(expectedAmount, d2cAmount, cPair, dPair, uPair)
     }
 }
+
+function divide(num1: number, num2: number): string {
+  const decimalNum1 = new Decimal(num1);
+  const decimalNum2 = new Decimal(num2);
+  const result = decimalNum1.div(decimalNum2).toString();
+
+  return result;
+}
+
 
 (async () => {
 

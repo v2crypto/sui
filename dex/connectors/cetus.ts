@@ -52,7 +52,6 @@ export class CetusConnector implements DexConnector {
           amount: (amount * 10 ** tokenA.decimals).toString(),
         })
         const tokenBAmount = side === "BUY" ? res.estimatedAmountIn : res.estimatedAmountOut
-        console.log(Number(tokenBAmount) * 10 ** (-tokenB.decimals))
 
         return Number(tokenBAmount) * 10 ** (-tokenB.decimals)
       }
