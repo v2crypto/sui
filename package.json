@@ -2,7 +2,7 @@
   "name": "cd-arbitrage",
   "version": "1.0.0",
   "dependencies": {
-    "@cetusprotocol/cetus-sui-clmm-sdk": "^3.14.0",
+    "@cetusprotocol/cetus-sui-clmm-sdk": "^3.12.0",
     "@ethersproject/providers": "^5.7.2",
     "@mysten/sui.js": "^0.45.1",
     "@types/bn.js": "^5.1.5",
