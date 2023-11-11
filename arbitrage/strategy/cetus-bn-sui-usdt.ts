@@ -66,7 +66,7 @@ const run = async () => {
     
     if (c2dSpread > expectedSpread) {
         logger.info("币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`币安价格高: ${c2dGot}; cetus价格低: ${c2dAmount}` +`Spread为:${c2dSpread * 100}%,高于预期:${expectedSpread * 100}%`)
+        sendToFeishu(`币安价格高: ${c2dGot}; \ncetus价格低: ${c2dAmount}\n` +`Spread为:${c2dSpread * 100}%\n高于预期:${expectedSpread * 100}%`)
         // await cdArbitrage.C2DOrder(expectedAmount, c2dAmount, cPair, dPair, uPair)
         return
     }
@@ -75,7 +75,9 @@ const run = async () => {
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
     if (d2cSpread > expectedSpread) {
         logger.info("cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`cetus价格高` + `Spread为:${d2cSpread * 100}%,高于预期:${expectedSpread * 100}%`)
+        sendToFeishu(`cetus价格高: ${d2cGot}; \n币安价格低: ${d2cAmount}\n` +`Spread为:${d2cSpread * 100}%\n高于预期:${expectedSpread * 100}%`)
+        return
+    }
         // await cdArbitrage.D2COrder(expectedAmount, d2cAmount, cPair, dPair, uPair)
     }
 }
@@ -88,7 +90,8 @@ const run = async () => {
             logger.info("done")
         } catch (e) {
             logger.error("runtime error: ", e)
-            await sleep(2 * 1000)
+            // sleep 5分钟
+            await sleep(5 * 60 * 1000)
         }
     }
 
