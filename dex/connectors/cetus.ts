@@ -14,9 +14,7 @@ export class CetusConnector implements DexConnector {
 
     constructor() {
         this.sdk = new CetusClmmSDK(buildSdkOptions())
-        const keypair = secretKeyToEd25519Keypair("0xa98392fe6e24ad7cebbe996fe6a99d7c6a838eda4da441699a315c1ebc8baa6f")
-        this.sdk.senderAddress = keypair.getPublicKey().toSuiAddress()
-        console.log(this.sdk.senderAddress)
+        this.sdk.senderAddress = '0xcbd0c9ba048879383c937b64911693a4275acab8b0699635655ac87279d76676'
     }
 
     async isTransactionSynced(): Promise<boolean> {
@@ -29,34 +27,34 @@ export class CetusConnector implements DexConnector {
     async getTradeAmount(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number) {
         const tokenIn = side === "BUY" ? tokenB : tokenA
         const tokenOut = side === "BUY" ? tokenA : tokenB
-        this.uri = '0xcf994611fd4c48e277ce3ffd4d4364c914af2c3cbb05f7bf6facd371de688630'
-        const pool = await this.sdk.Pool.getPool(this.uri)  
-        let price = TickMath.sqrtPriceX64ToPrice(new BN(pool.current_sqrt_price), tokenB.decimals, tokenA.decimals)
-        price = new Decimal(1).dividedBy(price)
+        // this.uri = '0xcf994611fd4c48e277ce3ffd4d4364c914af2c3cbb05f7bf6facd371de688630'
+        // const pool = await this.sdk.Pool.getPool(this.uri)  
+        // let price = TickMath.sqrtPriceX64ToPrice(new BN(pool.current_sqrt_price), tokenB.decimals, tokenA.decimals)
+        // price = new Decimal(1).dividedBy(price)
 
         // // Whether the swap direction is token a to token b
-        // const a2b = true
-        // // fix input token amount
-        // const coinAmount = new BN(amount)
-        // // input token amount is token a
-        // const byAmountIn = true
-        // // Fetch pool data
-        // const pool = await this.sdk.Pool.getPool('0xcf994611fd4c48e277ce3ffd4d4364c914af2c3cbb05f7bf6facd371de688630')
-        // console.log(pool)
-        // // Estimated amountIn amountOut fee
-        // const res: any = await this.sdk.Swap.preswap({
-        //   pool: pool,
-        //   currentSqrtPrice: pool.current_sqrt_price,
-        //   coinTypeA: pool.coinTypeA,
-        //   coinTypeB: pool.coinTypeB,
-        //   decimalsA: tokenA.decimals, // coin a 's decimals
-        //   decimalsB: tokenB.decimals, // coin b 's decimals
-        //   a2b,
-        //   byAmountIn,
-        //   amount: coinAmount.toString(),
-        // })
+        const a2b = side === "BUY" ? true :false
+        // fix input token amount
+        // input token amount is token a
+        const byAmountIn = side === "BUY" ? false : true
+        // Fetch pool data
+        const pool = await this.sdk.Pool.getPool('0xcf994611fd4c48e277ce3ffd4d4364c914af2c3cbb05f7bf6facd371de688630')
+        // Estimated amountIn amountOut fee
+        const res: any = await this.sdk.Swap.preswap({
+          pool: pool,
+          currentSqrtPrice: pool.current_sqrt_price,
+          coinTypeA: pool.coinTypeA, // usdc
+          coinTypeB: pool.coinTypeB, /// sui
+          decimalsA: tokenB.decimals, // coin a 's decimals
+          decimalsB: tokenA.decimals, // coin b 's decimals
+          a2b,
+          byAmountIn,
+          amount: (amount * 10 ** tokenA.decimals).toString(),
+        })
+        const tokenBAmount = side === "BUY" ? res.estimatedAmountIn : res.estimatedAmountOut
+        console.log(Number(tokenBAmount) * 10 ** (-tokenB.decimals))
 
-        return price.mul(amount).toNumber()
+        return Number(tokenBAmount) * 10 ** (-tokenB.decimals)
       }
 }
 

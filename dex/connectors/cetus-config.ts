@@ -27,7 +27,7 @@ export const mainnet = {
   fullRpcUrl: 'https://sui-mainnet-rpc.allthatnode.com',
   swapCountUrl: 'https://api-sui.cetus.zone/v2/sui/swap/count',
   simulationAccount: {
-    address: ''
+    address: '0xcbd0c9ba048879383c937b64911693a4275acab8b0699635655ac87279d76676'
   },
   cetus_config: {
     package_id: '0x95b8d278b876cae22206131fb9724f701c9444515813042f54f0a426c9a3bc2f',
@@ -68,4 +68,3 @@ export const mainnet = {
   },
   aggregatorUrl: 'https://api-sui.cetus.zone/router'
 }
-  
