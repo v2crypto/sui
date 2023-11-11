@@ -12,6 +12,7 @@ import { Pair } from "../../pair/pair";
 import { CetusConnector } from "../../dex/connectors/cetus";
 import { SuiSuiToken } from "../../token/sui-sui";
 import { SuiUsdtToken } from "../../token/sui-usdt";
+import axios from 'axios';
 
 // // provider
 // const NETWORK_URL = chainSettings.chains.arb1.networkUrl
@@ -59,12 +60,13 @@ const run = async () => {
     // }
 
     // 获取USDC价格
-    
 
     const [c2dSpread, c2dAmount] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
+    
     if (c2dSpread > expectedSpread) {
         logger.info("币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
+        sendToFeishu(`币安价格高` +`Spread为:${c2dSpread * 100}%,高于预期:${expectedSpread * 100}%`)
         // await cdArbitrage.C2DOrder(expectedAmount, c2dAmount, cPair, dPair, uPair)
         return
     }
@@ -72,7 +74,8 @@ const run = async () => {
     const [d2cSpread, d2cAmount] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
     if (d2cSpread > expectedSpread) {
-        logger.info("uniswap价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
+        logger.info("cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
+        sendToFeishu(`cetus价格高` + `Spread为:${d2cSpread * 100}%,高于预期:${expectedSpread * 100}%`)
         // await cdArbitrage.D2COrder(expectedAmount, d2cAmount, cPair, dPair, uPair)
     }
 }
@@ -91,3 +94,20 @@ const run = async () => {
 
 })();
 
+async function sendToFeishu(text: string) {
+    console.log("飞书",text)
+    const webhookUrl = 'https://open.feishu.cn/open-apis/bot/v2/hook/32b8b69d-113d-4ef2-aa5e-83584c596815';
+    const body = {
+      msg_type: 'text',
+      content: {
+        text: text,
+      },
+    };
+  
+    try {
+      const response = await axios.post(webhookUrl, body);
+        // console.log('Message sent to Feishu:', response.data);
+    } catch (error) {
+      console.error('Failed to send message to Feishu:', error);
+    }
+  }

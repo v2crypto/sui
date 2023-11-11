@@ -15,7 +15,7 @@ export const cexSettings = {
         apiKey: process.env.BINANCE_API_KEY!,
         apiSecret: process.env.BINANCE_API_SECRET!,
         //httpBase: "https://testnet.binance.vision",
-        httpBase: "https://api.binance.com",
+        httpBase: "https://api3.binance.com",
         wsBase: "wss://stream.binance.com:9443/ws",
         proxy: process.env.PROXY
     },
