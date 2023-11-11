@@ -32,7 +32,7 @@ export class CetusConnector implements DexConnector {
         :'0x06d8af9e6afd27262db436f0d37b304a041f710c3ea1fa4c3a9bab36b3569ad3'
         const pool = await this.sdk.Pool.getPool(this.uri)  
         let price = TickMath.sqrtPriceX64ToPrice(new BN(pool.current_sqrt_price), tokenB.decimals, tokenA.decimals)
-        if (side !== "BUY") {
+        if (side !== "SELL") {
             price = new Decimal(1).dividedBy(price)
         }
         return price.mul(amount).toNumber()
