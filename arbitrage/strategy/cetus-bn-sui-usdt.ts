@@ -40,7 +40,7 @@ const cPair = new Pair(suiSuiToken, arb1UsdtToken)
 const cdArbitrage = new CDArbitrage(cexClient, dexClient, null);
 
 const expectedAmount = 1;
-const expectedSpread = 0.003;
+const expectedSpread = 0.004;
 
 const run = async () => {
     // const isBalanceEnough = await cdArbitrage.isBalanceEnough(arb1UsdtToken, 0);
@@ -90,7 +90,7 @@ const run = async () => {
         } catch (e) {
             logger.error("runtime error: ", e)
         }
-        await sleep(1 * 60 * 1000)
+        await sleep(1 * 1000)
     }
 
 })();
