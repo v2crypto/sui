@@ -38,7 +38,7 @@ export class CDArbitrage {
         logger.info("Dex估价" + `消耗${cost}数量的${dPair.tokenB.symbol}, 买入${expectedAmount}数量的${dPair.tokenA.symbol}`)
         const got = await this.cexClient.getTraveAmount(cPair.getSymbol(), "SELL", expectedAmount)
         logger.info("Cex估价" + `卖出${expectedAmount}数量的${cPair.tokenA.symbol}, 获得${got}数量的${cPair.tokenB.symbol}`)
-        return [(got-cost)/got, cost]
+        return [(got-cost)/got, cost, got]
     }
 
     async getD2CSpreadAndAmount(expectedAmount: number, cPair: Pair, dPair: Pair) {
@@ -46,7 +46,7 @@ export class CDArbitrage {
         logger.info("Dex估价" + `卖出${expectedAmount}数量的${dPair.tokenA.symbol}, 获得${got}数量的${dPair.tokenB.symbol}`)
         const cost = await this.cexClient.getTraveAmount(cPair.getSymbol(), "BUY", expectedAmount)
         logger.info("Cex估价" + `消耗${cost}数量的${cPair.tokenB.symbol}, 买入${expectedAmount}数量的${cPair.tokenA.symbol}`)
-        return [(got-cost)/got, got]
+        return [(got-cost)/got, got, cost]
     }
 
     async C2DOrder(expectedAmount:number, orderAmount: number,  cPair: Pair, dPair: Pair, uPair?: Pair) {

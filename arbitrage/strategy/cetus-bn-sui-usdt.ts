@@ -39,7 +39,7 @@ const cPair = new Pair(suiSuiToken, arb1UsdtToken)
 
 const cdArbitrage = new CDArbitrage(cexClient, dexClient, null);
 
-const expectedAmount = 100;
+const expectedAmount = 1;
 const expectedSpread = 0.003;
 
 const run = async () => {
@@ -61,17 +61,17 @@ const run = async () => {
 
     // 获取USDC价格
 
-    const [c2dSpread, c2dAmount] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
+    const [c2dSpread, c2dAmount, c2dGot] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
     
     if (c2dSpread > expectedSpread) {
         logger.info("币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`币安价格高` +`Spread为:${c2dSpread * 100}%,高于预期:${expectedSpread * 100}%`)
+        sendToFeishu(`币安价格高: ${c2dGot}; cetus价格低: ${c2dAmount}` +`Spread为:${c2dSpread * 100}%,高于预期:${expectedSpread * 100}%`)
         // await cdArbitrage.C2DOrder(expectedAmount, c2dAmount, cPair, dPair, uPair)
         return
     }
 
-    const [d2cSpread, d2cAmount] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
+    const [d2cSpread, d2cAmount, d2cGot] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
     if (d2cSpread > expectedSpread) {
         logger.info("cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
