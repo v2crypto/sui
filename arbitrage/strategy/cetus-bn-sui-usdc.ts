@@ -40,7 +40,7 @@ const cPair = new Pair(suiSuiToken, arb1UsdcToken)
 
 const cdArbitrage = new CDArbitrage(cexClient, dexClient, null);
 
-const expectedAmount = 1;
+const expectedAmount = 500;
 const expectedSpread = 0.004;
 
 const run = async () => {
