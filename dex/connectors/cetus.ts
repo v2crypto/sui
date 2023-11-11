@@ -28,8 +28,7 @@ export class CetusConnector implements DexConnector {
     async getTradeAmount(tokenA: ERC20Token, tokenB: ERC20Token, side: SIDE, amount: number) {
         const tokenIn = side === "BUY" ? tokenB : tokenA
         const tokenOut = side === "BUY" ? tokenA : tokenB
-        this.uri =  side === "BUY" ? '0x4eed0ec3402f2e728eec4d7f6c6649084f2aa243e13d585ac67e3bf81c34039b'
-        :'0x06d8af9e6afd27262db436f0d37b304a041f710c3ea1fa4c3a9bab36b3569ad3'
+        this.uri = '0xcf994611fd4c48e277ce3ffd4d4364c914af2c3cbb05f7bf6facd371de688630'
         const pool = await this.sdk.Pool.getPool(this.uri)  
         let price = TickMath.sqrtPriceX64ToPrice(new BN(pool.current_sqrt_price), tokenB.decimals, tokenA.decimals)
         price = new Decimal(1).dividedBy(price)

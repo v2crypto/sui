@@ -13,6 +13,7 @@ import { CetusConnector } from "../../dex/connectors/cetus";
 import { SuiSuiToken } from "../../token/sui-sui";
 import { SuiUsdtToken } from "../../token/sui-usdt";
 import axios from 'axios';
+import { SuiUsdcToken } from "../../token/sui-usdc";
 
 // // provider
 // const NETWORK_URL = chainSettings.chains.arb1.networkUrl
@@ -31,10 +32,10 @@ const cetusConnector = new CetusConnector();
 const dexClient = new DexClient(cetusConnector);
 
 const suiSuiToken = new SuiSuiToken(null)
-const arb1UsdtToken = new SuiUsdtToken(null)
+const arb1UsdcToken = new SuiUsdcToken(null)
 
-const dPair = new Pair(suiSuiToken, arb1UsdtToken)
-const cPair = new Pair(suiSuiToken, arb1UsdtToken)
+const dPair = new Pair(suiSuiToken, arb1UsdcToken)
+const cPair = new Pair(suiSuiToken, arb1UsdcToken)
 
 
 const cdArbitrage = new CDArbitrage(cexClient, dexClient, null);
