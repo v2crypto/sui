@@ -89,9 +89,8 @@ const run = async () => {
             logger.info("done")
         } catch (e) {
             logger.error("runtime error: ", e)
-            // sleep 5分钟
-            await sleep(5 * 60 * 1000)
         }
+        await sleep(5 * 60 * 1000)
     }
 
 })();
