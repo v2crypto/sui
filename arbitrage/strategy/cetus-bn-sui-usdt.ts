@@ -77,7 +77,6 @@ const run = async () => {
         logger.info("cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
         sendToFeishu(`cetus价格高: ${d2cGot}; \n币安价格低: ${d2cAmount}\n` +`Spread为:${d2cSpread * 100}%\n高于预期:${expectedSpread * 100}%`)
         return
-    }
         // await cdArbitrage.D2COrder(expectedAmount, d2cAmount, cPair, dPair, uPair)
     }
 }
