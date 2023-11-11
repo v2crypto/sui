@@ -8,7 +8,7 @@ export class SuiUsdcToken extends ERC20Token {
         
     ) {
         super(wallet, {
-            symbol: "USDC",
+            symbol: "USDT",
             name: "USDC (SUI)",
             decimals: 6,
             address: "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
