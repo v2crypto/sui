@@ -67,8 +67,10 @@ const run = async () => {
     logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
     
     if (c2dSpread > expectedSpread) {
-        logger.info("币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`买卖${expectedAmount}个${suiSuiToken.symbol}，
+        logger.info("${getCurrentBeijingTime():币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
+        // 打印东八区时间
+        sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
+        买卖${expectedAmount}个${suiSuiToken.symbol}\n
         币安价格高: ${divide(c2dGot, expectedAmount)}\n
         cetus价格低: ${divide(c2dAmount, expectedAmount)}\n
         Spread为:${c2dSpread * 100}%\n
@@ -80,8 +82,9 @@ const run = async () => {
     const [d2cSpread, d2cAmount, d2cGot] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
     if (d2cSpread > expectedSpread) {
-        logger.info("cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
-        sendToFeishu(`买卖${expectedAmount}个${suiSuiToken.symbol}，
+        logger.info("${getCurrentBeijingTime():cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
+        sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
+        买卖${expectedAmount}个${suiSuiToken.symbol}，
         cetus价格高: ${divide(d2cGot, expectedAmount)}\n
         币安价格低: ${divide(d2cAmount, expectedAmount)}\n
         Spread为:${d2cSpread * 100}%\n
@@ -114,6 +117,12 @@ function divide(num1: number, num2: number): string {
     }
 
 })();
+
+function getCurrentBeijingTime() {
+  const currentTime = new Date();
+  const beijingTime = currentTime.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' });
+  return beijingTime;
+}
 
 async function sendToFeishu(text: string) {
     console.log("飞书",text)
