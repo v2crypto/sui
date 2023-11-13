@@ -113,7 +113,7 @@ function divide(num1: number, num2: number): string {
         } catch (e) {
             logger.error("runtime error: ", e)
         }
-        await sleep(1 * 1000)
+        await sleep(1 * 100)
     }
 
 })();
