@@ -7,6 +7,7 @@ export const settings = {
     logsPath: process.env.LOGS_PATH || "./logs",
     errorLog: process.env.ERROR_LOG || "error.log",
     infoLog: process.env.INFO_LOG || "info.log",
+    debugLog: process.env.DEBUG_LOG || "debug.log",
     level: process.env.LOG_LEVEL || "debug",
 }
 

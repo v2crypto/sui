@@ -63,7 +63,7 @@ const run = async () => {
     
 
     const [c2dSpread, c2dAmount] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
-    logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
+    logger.info(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
     if (c2dSpread > expectedSpread) {
         logger.info("币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
         await cdArbitrage.C2DOrder(expectedAmount, c2dAmount, cPair, dPair, uPair)
@@ -71,7 +71,7 @@ const run = async () => {
     }
 
     const [d2cSpread, d2cAmount] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
-    logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
+    logger.info(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
     if (d2cSpread > expectedSpread) {
         logger.info("uniswap价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
         await cdArbitrage.D2COrder(expectedAmount, d2cAmount, cPair, dPair, uPair)

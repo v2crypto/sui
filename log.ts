@@ -12,6 +12,10 @@ const infoLog = path.format({
   dir: settings.logsPath,
   base: settings.infoLog
 })
+const debugLog = path.format({
+  dir: settings.logsPath,
+  base: settings.debugLog
+})
 
 const logOutput = format.printf( ({ level, message, timestamp , ...metadata}) => {
   let msg = `${timestamp} [${level}] : ${message} `  
@@ -37,8 +41,9 @@ const logger = createLogger({
     // - Write all logs with importance level of `error` or less to `error.log`
     // - Write all logs with importance level of `info` or less to `stdout.log`
     //
-    new transports.File({ filename: errorLog, level: 'error' }),
-    new transports.File({ filename: infoLog }),
+    new transports.File({ filename: errorLog, level: 'error',  }),
+    new transports.File({ filename: infoLog, level: 'info' }),
+    new transports.File({ filename: debugLog, level: 'debug' }),
   ],
 });
 

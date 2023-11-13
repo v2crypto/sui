@@ -64,7 +64,7 @@ const run = async () => {
     // 获取USDC价格
 
     const [c2dSpread, c2dAmount, c2dGot] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
-    logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
+    logger.info(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}, c2dGot: ${c2dGot}`)
     
     if (c2dSpread > expectedSpread && c2dGot > 0 && c2dAmount > 0) { 
         logger.info(`${getCurrentBeijingTime()}:币安价格高 Spread为:${c2dSpread},高于预期:${expectedSpread}`)
@@ -80,7 +80,7 @@ const run = async () => {
     }
 
     const [d2cSpread, d2cAmount, d2cGot] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
-    logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
+    logger.info(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}, d2cGot: ${d2cGot}`)
     if (d2cSpread > expectedSpread && c2dGot > 0 && c2dAmount > 0) {
         logger.info(`${getCurrentBeijingTime()}:cetus价格高 Spread为:${d2cSpread},高于预期:${expectedSpread}`)
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n

@@ -82,7 +82,6 @@ export class BinanceConnector implements CexConnector {
             // recvWindow: 1000,
         });
         logger.info(`币安 market order ${side} ${amount} ${symbol} success`);
-        logger.debug("币安下单详情", order)
 
         return order.orderId;
     }
