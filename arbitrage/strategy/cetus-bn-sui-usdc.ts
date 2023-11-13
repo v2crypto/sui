@@ -41,8 +41,8 @@ const cPair = new Pair(suiSuiToken, arb1UsdcToken)
 
 const cdArbitrage = new CDArbitrage(cexClient, dexClient, null);
 
-const expectedAmount = 500;
-const expectedSpread = 0.003;
+const expectedAmount = 1000;
+const expectedSpread = 0.004;
 
 const run = async () => {
     // const isBalanceEnough = await cdArbitrage.isBalanceEnough(arb1UsdtToken, 0);
@@ -66,7 +66,7 @@ const run = async () => {
     const [c2dSpread, c2dAmount, c2dGot] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
     
-    if (c2dSpread > expectedSpread) {
+    if (c2dSpread > expectedSpread && c2dGot !== 0 && c2dAmount !== 0) { 
         logger.info("${getCurrentBeijingTime():币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
         // 打印东八区时间
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
@@ -81,7 +81,7 @@ const run = async () => {
 
     const [d2cSpread, d2cAmount, d2cGot] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
-    if (d2cSpread > expectedSpread) {
+    if (d2cSpread > expectedSpread && c2dGot !== 0 && c2dAmount !== 0) {
         logger.info("${getCurrentBeijingTime():cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
         买卖${expectedAmount}个${suiSuiToken.symbol}，
