@@ -2,6 +2,7 @@ import JSBI from 'jsbi'
 import { ERC20Token } from './token/erc20';
 import { Token } from '@uniswap/sdk-core';
 import { ChainId } from '@uniswap/smart-order-router';
+import axios from 'axios';
 
 export const sleep = async (ms: number) => {
     return new Promise((resolve) => {
