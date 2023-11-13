@@ -27,3 +27,21 @@ function countDecimals(x: number) {
   }
   return x.toString().split('.')[1].length || 0
 }
+
+export async function sendToFeishu(text: string) {
+  console.log("飞书",text)
+  const webhookUrl = 'https://open.feishu.cn/open-apis/bot/v2/hook/32b8b69d-113d-4ef2-aa5e-83584c596815';
+  const body = {
+    msg_type: 'text',
+    content: {
+      text: text,
+    },
+  };
+
+  try {
+    const response = await axios.post(webhookUrl, body);
+      // console.log('Message sent to Feishu:', response.data);
+  } catch (error) {
+    console.error('Failed to send message to Feishu:', error);
+  }
+}

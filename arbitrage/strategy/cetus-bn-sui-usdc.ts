@@ -5,7 +5,7 @@ import { DexClient } from "../../dex/dex";
 import { UniswapConnector } from "../../dex/connectors/uniswap";
 import { ethers } from "ethers";
 import { chainSettings } from "../../settings";
-import { sleep } from "../../utils";
+import { sendToFeishu, sleep } from "../../utils";
 import logger from "../../log";
 import { Arb1UsdcToken } from "../../token/arb1-usdc";
 import { Pair } from "../../pair/pair";
@@ -66,8 +66,8 @@ const run = async () => {
     const [c2dSpread, c2dAmount, c2dGot] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}`)
     
-    if (c2dSpread > expectedSpread && c2dGot !== 0 && c2dAmount !== 0) { 
-        logger.info("${getCurrentBeijingTime():币安价格高" + `Spread为:${c2dSpread},高于预期:${expectedSpread}`)
+    if (c2dSpread > expectedSpread && c2dGot > 0 && c2dAmount > 0) { 
+        logger.info(`${getCurrentBeijingTime()}:币安价格高 Spread为:${c2dSpread},高于预期:${expectedSpread}`)
         // 打印东八区时间
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
         买卖${expectedAmount}个${suiSuiToken.symbol}\n
@@ -81,8 +81,8 @@ const run = async () => {
 
     const [d2cSpread, d2cAmount, d2cGot] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.debug(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}`)
-    if (d2cSpread > expectedSpread && c2dGot !== 0 && c2dAmount !== 0) {
-        logger.info("${getCurrentBeijingTime():cetus价格高" + `Spread为:${d2cSpread},高于预期:${expectedSpread}`)
+    if (d2cSpread > expectedSpread && c2dGot > 0 && c2dAmount > 0) {
+        logger.info(`${getCurrentBeijingTime()}:cetus价格高 Spread为:${d2cSpread},高于预期:${expectedSpread}`)
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
         买卖${expectedAmount}个${suiSuiToken.symbol}，
         cetus价格高: ${divide(d2cGot, expectedAmount)}\n
@@ -123,21 +123,3 @@ function getCurrentBeijingTime() {
   const beijingTime = currentTime.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' });
   return beijingTime;
 }
-
-async function sendToFeishu(text: string) {
-    console.log("飞书",text)
-    const webhookUrl = 'https://open.feishu.cn/open-apis/bot/v2/hook/32b8b69d-113d-4ef2-aa5e-83584c596815';
-    const body = {
-      msg_type: 'text',
-      content: {
-        text: text,
-      },
-    };
-  
-    try {
-      const response = await axios.post(webhookUrl, body);
-        // console.log('Message sent to Feishu:', response.data);
-    } catch (error) {
-      console.error('Failed to send message to Feishu:', error);
-    }
-  }

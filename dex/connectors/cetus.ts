@@ -6,6 +6,7 @@ import { TransactionState } from "./uniswap";
 import { buildSdkOptions } from "./cetus-config";
 import BN from "bn.js";
 import Decimal from "decimal.js";
+import { sendToFeishu } from "../../utils";
 
 export class CetusConnector implements DexConnector {
 
@@ -53,8 +54,9 @@ export class CetusConnector implements DexConnector {
         })
         
         const tokenBAmount = side === "BUY" ? res.estimatedAmountIn : res.estimatedAmountOut
-        if (tokenBAmount === '0') {
+        if (!tokenBAmount) {
           console.log(res)
+          sendToFeishu("preswap error" + JSON.stringify(res))
         }
 
         return Number(tokenBAmount) * 10 ** (-tokenB.decimals)
