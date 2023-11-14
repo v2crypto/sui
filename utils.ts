@@ -3,6 +3,7 @@ import { ERC20Token } from './token/erc20';
 import { Token } from '@uniswap/sdk-core';
 import { ChainId } from '@uniswap/smart-order-router';
 import axios from 'axios';
+import Decimal from 'decimal.js';
 
 export const sleep = async (ms: number) => {
     return new Promise((resolve) => {
@@ -46,3 +47,22 @@ export async function sendToFeishu(text: string) {
     console.error('Failed to send message to Feishu:', error);
   }
 }
+
+export function decimalDivide(num1: number, num2: number): number {
+  const decimalNum1 = new Decimal(num1);
+  const decimalNum2 = new Decimal(num2);
+  return  decimalNum1.div(decimalNum2).toNumber();
+}
+
+export function decimalMul(num1: number, num2: number): number {
+  const decimalNum1 = new Decimal(num1);
+  const decimalNum2 = new Decimal(num2);
+  return  decimalNum1.mul(decimalNum2).toNumber();
+}
+
+export function decimalPow(num1: number, num2: number): number {
+  const decimalNum1 = new Decimal(num1);
+  const decimalNum2 = new Decimal(num2);
+  return  decimalNum1.pow(decimalNum2).toNumber();
+}
+

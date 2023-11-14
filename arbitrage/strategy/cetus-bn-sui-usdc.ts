@@ -5,7 +5,7 @@ import { DexClient } from "../../dex/dex";
 import { UniswapConnector } from "../../dex/connectors/uniswap";
 import { ethers } from "ethers";
 import { chainSettings } from "../../settings";
-import { sendToFeishu, sleep } from "../../utils";
+import { decimalDivide, sendToFeishu, sleep } from "../../utils";
 import logger from "../../log";
 import { Arb1UsdcToken } from "../../token/arb1-usdc";
 import { Pair } from "../../pair/pair";
@@ -66,13 +66,13 @@ const run = async () => {
     const [c2dSpread, c2dAmount, c2dGot] = await cdArbitrage.getC2DSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.info(`c2dSpread: ${c2dSpread}, c2dAmount: ${c2dAmount}, c2dGot: ${c2dGot}`)
     
-    if (c2dSpread > expectedSpread && c2dGot > 0 && c2dAmount > 0) { 
+    if (c2dSpread > expectedSpread && c2dGot && c2dAmount) { 
         logger.info(`${getCurrentBeijingTime()}:币安价格高 Spread为:${c2dSpread},高于预期:${expectedSpread}`)
         // 打印东八区时间
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
         买卖${expectedAmount}个${suiSuiToken.symbol}\n
-        币安价格高: ${divide(c2dGot, expectedAmount)}\n
-        cetus价格低: ${divide(c2dAmount, expectedAmount)}\n
+        币安价格高: ${decimalDivide(c2dGot, expectedAmount)}\n
+        cetus价格低: ${decimalDivide(c2dAmount, expectedAmount)}\n
         Spread为:${c2dSpread * 100}%\n
         高于预期:${expectedSpread * 100}%`)
         // await cdArbitrage.C2DOrder(expectedAmount, c2dAmount, cPair, dPair, uPair)
@@ -81,26 +81,18 @@ const run = async () => {
 
     const [d2cSpread, d2cAmount, d2cGot] = await cdArbitrage.getD2CSpreadAndAmount(expectedAmount, cPair, dPair);
     logger.info(`d2cSpread: ${d2cSpread}, d2cAmount: ${d2cAmount}, d2cGot: ${d2cGot}`)
-    if (d2cSpread > expectedSpread && c2dGot > 0 && c2dAmount > 0) {
+    if (d2cSpread > expectedSpread && c2dGot && c2dAmount) {
         logger.info(`${getCurrentBeijingTime()}:cetus价格高 Spread为:${d2cSpread},高于预期:${expectedSpread}`)
         sendToFeishu(`当前时间: ${getCurrentBeijingTime()}\n
         买卖${expectedAmount}个${suiSuiToken.symbol}，
-        cetus价格高: ${divide(d2cGot, expectedAmount)}\n
-        币安价格低: ${divide(d2cAmount, expectedAmount)}\n
+        cetus价格高: ${decimalDivide(d2cAmount, expectedAmount)}\n
+        币安价格低: ${decimalDivide(d2cGot, expectedAmount)}\n
         Spread为:${d2cSpread * 100}%\n
         高于预期:${expectedSpread * 100}%`)
         
         return
         // await cdArbitrage.D2COrder(expectedAmount, d2cAmount, cPair, dPair, uPair)
     }
-}
-
-function divide(num1: number, num2: number): string {
-  const decimalNum1 = new Decimal(num1);
-  const decimalNum2 = new Decimal(num2);
-  const result = decimalNum1.div(decimalNum2).toString();
-
-  return result;
 }
 
 

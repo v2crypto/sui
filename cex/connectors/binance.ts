@@ -63,8 +63,7 @@ export class BinanceConnector implements CexConnector {
             return total
           }
         }
-        // return 0 if not enough depth
-        return 0
+        return NaN
       }
 
     public async marketOrder(symbol: string, side: SIDE, amount: number) {

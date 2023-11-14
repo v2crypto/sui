@@ -6,7 +6,7 @@ import { TransactionState } from "./uniswap";
 import { buildSdkOptions } from "./cetus-config";
 import BN from "bn.js";
 import Decimal from "decimal.js";
-import { sendToFeishu } from "../../utils";
+import { decimalMul, decimalPow, sendToFeishu } from "../../utils";
 import logger from "../../log";
 
 export class CetusConnector implements DexConnector {
@@ -51,13 +51,13 @@ export class CetusConnector implements DexConnector {
           decimalsB: tokenA.decimals, // coin b 's decimals
           a2b,
           byAmountIn,
-          amount: (amount * 10 ** tokenA.decimals).toString(),
+          amount: (decimalMul(amount, decimalPow(10, tokenA.decimals))).toString(),
         })
         
         const tokenBAmount = side === "BUY" ? res.estimatedAmountIn : res.estimatedAmountOut
         logger.debug(JSON.stringify(res))
 
-        return Number(tokenBAmount) * 10 ** (-tokenB.decimals)
+        return decimalMul(tokenBAmount, decimalPow(10, -tokenB.decimals))
       }
 }
 
